@@ -5,7 +5,7 @@ export default class ColorObject {
         this.colorComponent = new ColorComponent(r, g, b, additive);
         this.sprite = scene.add.sprite(x, y, textura);
         this.sprite.setInteractive();
-        
+
         this.sprite.setTint(this.colorComponent.getTint());
     }
 
@@ -15,6 +15,6 @@ export default class ColorObject {
     }
 
     compare(otherColorObject) {
-        return colorComponent.compare(otherColorObject.colorComponent);
+        return this.colorComponent.compare(otherColorObject.colorComponent);
     }
 }
