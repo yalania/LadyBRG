@@ -1,5 +1,6 @@
 import ColorComponent from "../components/ColorComponent.js";
 import ColorObject from "../gameElements/ColorObject.js";
+import {LadyBug} from '../gameObjects/LadyBug.js';
 
 export class Start extends Phaser.Scene {
 
@@ -11,20 +12,23 @@ export class Start extends Phaser.Scene {
 
     preload() {
         this.load.image('background', 'assets/space.png');
-
-        this.load.image('foodtest', 'assets/Test/foodtest.png');
+        //this.load.image('LadyBug', 'assets/character/ladybug.png');
+    
 
         //  The ship sprite is CC0 from https://ansimuz.itch.io - check out his other work!
         this.load.spritesheet('ship', 'assets/spaceship.png', { frameWidth: 176, frameHeight: 96 });
+        this.load.spritesheet('LadyBug', 'assets/character/ladybug.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
-        this.background = this.add.tileSprite(640, 360, 1280, 720, 'background');
+        //this.background = this.add.tileSprite(640, 360, 1280, 720, 'background');
         this.generateGame(3);    
+        this.ladyBug = new LadyBug(this, 100, 450, 'LadyBug');
     }
 
     update() {
-        this.background.tilePositionX += 32;
+        //this.background.tilePositionX += 32;
+        this.ladyBug.anims.play('move', true);
     }
 
     generateGame(tilesNumber)
