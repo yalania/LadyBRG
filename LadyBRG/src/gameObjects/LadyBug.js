@@ -1,5 +1,4 @@
-export class LadyBug extends Phaser.Physics.Arcade.Sprite
-{
+export class LadyBug extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture, frame) {
         super(scene, x, y, texture, frame);
         // ...
@@ -23,6 +22,20 @@ export class LadyBug extends Phaser.Physics.Arcade.Sprite
         scene.anims.create({
             key: 'idle',
             frames: this.anims.generateFrameNumbers('LadyBug', { start: 4, end: 5 }),
+            frameRate: 5,
+            repeat: -1
+        });
+
+        scene.anims.create({
+            key: 'success',
+            frames: this.anims.generateFrameNumbers('LadyBug', { start: 14, end: 20 }),
+            frameRate: 5,
+            repeat: -1
+        });
+
+        scene.anims.create({
+            key: 'fail',
+            frames: this.anims.generateFrameNumbers('LadyBug', { start: 27, end: 30 }),
             frameRate: 5,
             repeat: -1
         });
