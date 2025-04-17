@@ -6,25 +6,25 @@ export class Main extends Phaser.Scene {
 
     resultColor = null;
     targetColor = null;
+    selectionCount = 0;
+    maxSelectionCount = 0;
+    selectedTiles = [];
     constructor() {
         super('Main');
     }
 
     preload() {
-        this.load.image('background', 'assets/space.png');
-        //this.load.image('LadyBug', 'assets/character/ladybug.png');
-    
-
-        //  The ship sprite is CC0 from https://ansimuz.itch.io - check out his other work!
-        this.load.spritesheet('ship', 'assets/spaceship.png', { frameWidth: 176, frameHeight: 96 });
+                this.load.image('background', 'assets/background/Summer5.png');
         this.load.spritesheet('LadyBug', 'assets/character/ladybug.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
-        //this.background = this.add.tileSprite(640, 360, 1280, 720, 'background');
-        this.generateGame(3);    
+        this.background = this.add.image(1152, 648, 'background');
+        this.generateGame(8);    
         this.ladyBug = new LadyBug(this, 100, 450, 'LadyBug');
         this.ladyBug.setDepth(3);
+        this.selectionCount = 0;
+        this.add.text(0, 0, 'Need:' + this.maxSelectionCount);
     }
 
     update() {
@@ -37,59 +37,73 @@ export class Main extends Phaser.Scene {
     {
         tile.startMoveAnimation(this.resultColor, this.targetColor);
         this.time.delayedCall(1021, () => {
+            this.selectionCount++;
             if (this.resultColor.compare(this.targetColor)) {
                 this.ladyBug.anims.play('jump', true);
                 this.time.delayedCall(2000, () => {
                     this.scene.restart();
                 });
+            }else if (this.selectionCount >= this.maxSelectionCount)
+            {
+                                this.time.delayedCall(2000, () => {
+                this.scene.restart();
+                                });
             }
         });
     }
 
     generateGame(tilesNumber) {
-        const rValue = Phaser.Math.Between(0, 255);
-        const gValue = Phaser.Math.Between(0, 255);
-        const bValue = Phaser.Math.Between(0, 255);
+        const marginX = 0.4;
+        const marginY = 0.4;
 
-        let targetRValue = 0;
-        let targetGValue = 0;
-        let targetBValue = 0;
+        const centerX = this.scale.width / 2;
+        const centerY = this.scale.height / 2;
 
-        let rPercentage = 100;
-        let gPercentage = 100;
-        let bPercentage = 100;
+        const endXPostion = this.scale.width - (centerX* marginX); 
+        const endYPostion = this.scale.height  - (centerY* marginY); 
 
+        this.generateTargetColor(centerX, endYPostion);
+
+        let xPos = (centerX - (centerX* marginX)) - 48;
+        let yPos = centerY - (centerY* marginY);
+        this.generateValidCombinations(tilesNumber, xPos, yPos, endXPostion);
+
+        //GenerateTarget
+
+        this.resultColor = new ColorObject(this, 148, endYPostion, 0);
+        this.resultColor.shape.setDepth(1);
+    }
+
+    generateTargetColor(x, y) {
+        let hue = Phaser.Math.Between(0, 360);
+        this.targetColor = new ColorObject(this, x, y, hue);
+    }
+
+    generateValidCombinations(tilesNumber,x, y, endXPostion) {
         let tiles = [];
-        let xPos = 400;
-        let yPos = 200;
+        let xPos = x;
+        let yPos = y;
+
+        this.maxSelectionCount = 2;
         for (let i = 0; i < tilesNumber; i++) {
-            const rPercentageRandom = Phaser.Math.Between(0, rPercentage);
-            const gPercentageRandom = Phaser.Math.Between(0, gPercentage);
-            const bPercentageRandom = Phaser.Math.Between(0, bPercentage);
+            //Use basic colors that are easy to mix
+            let hue = Phaser.Math.Between(0, 360);
+            tiles[i] = new ColorObject(this, xPos, yPos, hue);
 
-            const rTileValue = (rPercentageRandom * rValue) / 100;
-            const gTileValue = (gPercentageRandom * gValue) / 100;
-            const bTileValue = (bPercentageRandom * bValue) / 100;
-            tiles[i] = new ColorObject(this, xPos, yPos, rTileValue, gTileValue, bTileValue, true);
-
-            rPercentage -= rPercentageRandom;
-            gPercentage -= gPercentageRandom;
-            bPercentage -= bPercentageRandom;
-            xPos += 250;
+            const nextXPos = xPos + (96*2);
+            if(nextXPos >= endXPostion)
+            {
+                xPos = x - 48;
+                yPos += 96*2;
+            }else{
+                xPos = nextXPos;
+            }
 
             tiles[i].shape.on('pointerdown', () => {
                 this.onSelectedTile(tiles[i]);
             });
             tiles[i].shape.setDepth(2);
-
-            targetRValue += rTileValue;
-            targetGValue += gTileValue;
-            targetBValue += bTileValue;
+            //hue = (hue + colorStep);
         }
-
-        yPos += 96 * 3;
-        this.targetColor = new ColorObject(this, 648, yPos, targetRValue, targetGValue, targetBValue, true);
-        this.resultColor = new ColorObject(this, 148, yPos, 0, 0, 0, true);
-        this.resultColor.shape.setDepth(1);
     }
 }

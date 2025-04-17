@@ -1,32 +1,47 @@
 export default class ColorComponent {
 
     color;
-    additiveValue;
+    hueValue;
 
-    constructor(r = 0, g = 0, b = 0, isAdditive = true) {
-        this.color = new Phaser.Math.Vector3(r, g, b);
-        if (isAdditive) {
-            this.additiveValue = 1;
-        } else {
-            this.additiveValue = -1;
-        }
+    constructor(scene, hue) {
+        this.hueValue = hue;
+        this.scene = scene;
+        this.color = Phaser.Display.Color.HSVToRGB(this.hueValue / 360, scene.game.config.saturation, scene.game.config.lightness);
+
     }
 
     add(otherColorComponent) {
-        this.color.add(otherColorComponent.color.scale(otherColorComponent.additiveValue));
 
-        // Limitar los valores de los colores entre 0 y 255
-        this.color.x = Phaser.Math.Clamp(this.color.x, 0, 255);
-        this.color.y = Phaser.Math.Clamp(this.color.y, 0, 255);
-        this.color.z = Phaser.Math.Clamp(this.color.z, 0, 255);
+        if (this.hueValue <= 0) {
+            this.hueValue = otherColorComponent.hueValue;
+            this.color = otherColorComponent.color;
+        } else if (otherColorComponent.hueValue <= 0) {
+            otherColorComponent.hueValue = this.color;
+            otherColorComponent.color = this.color;
+        } else {
+
+            this.hueValue = ((this.hueValue + otherColorComponent.hueValue)/2) % 360;
+
+            const sat = 0.8;
+            const light = 0.5;
+
+            this.color = Phaser.Display.Color.HSVToRGB(this.hueValue / 360, sat, light);
+        }
     }
 
     compare(otherColorComponent) {
-        return this.color.equals(otherColorComponent.color);
+        let hueDiff = Math.abs(this.hueValue - otherColorComponent.hueValue);
+        return hueDiff <= 30;
     }
 
     getTint() {
-        return Phaser.Display.Color.GetColor(this.color.x, this.color.y, this.color.z);
+
+        if (this.hueValue <= 0) {
+            return Phaser.Display.Color.GetColor(255, 255, 255);
+        } else {
+
+            return Phaser.Display.Color.GetColor(this.color.r, this.color.g, this.color.b);
+        }
     }
 
 }

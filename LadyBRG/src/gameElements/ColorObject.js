@@ -1,8 +1,8 @@
 import ColorComponent from "../components/ColorComponent.js";
 
 export default class ColorObject {
-    constructor(scene, x, y, r, g, b, additive) {
-        this.colorComponent = new ColorComponent(r, g, b, additive);
+    constructor(scene, x, y, hue) {
+        this.colorComponent = new ColorComponent(scene,hue);
         this.x = x;
         this.y = y;
         this.scene = scene;
