@@ -22,7 +22,7 @@ export class Start extends Phaser.Scene {
 
         this.input.once('pointerdown', function () {
 
-            this.scene.add('main', Main, true, { x: 400, y: 300 });
+            tthis.scene.start('Main');
 
         }, this);
     }

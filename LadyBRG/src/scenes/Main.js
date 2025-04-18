@@ -1,109 +1,122 @@
-import ColorComponent from "../components/ColorComponent.js";
-import ColorObject from "../gameElements/ColorObject.js";
+import ColorTile from "../gameObjects/ColorTile.js";
 import {LadyBug} from '../gameObjects/LadyBug.js';
+import HUEWheel from '../gameObjects/HUEWheel.js';
 
 export class Main extends Phaser.Scene {
-
-    resultColor = null;
-    targetColor = null;
-    selectionCount = 0;
-    maxSelectionCount = 0;
-    selectedTiles = [];
+    gametiles = [];
+    currentTryNumber = 0;
+    maxTryNumber = 0;
+    currentValidRange = 30;
+    score = 0;
     constructor() {
         super('Main');
     }
 
     preload() {
-                this.load.image('background', 'assets/background/Summer5.png');
+        this.load.image('background', 'assets/background/Summer5.png');
         this.load.spritesheet('LadyBug', 'assets/character/ladybug.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
         this.background = this.add.image(1152, 648, 'background');
-        this.generateGame(8);    
         this.ladyBug = new LadyBug(this, 100, 450, 'LadyBug');
         this.ladyBug.setDepth(3);
-        this.selectionCount = 0;
-        this.add.text(0, 0, 'Need:' + this.maxSelectionCount);
+
+        //Score
+        this.scoreText = this.add.text(20, 20, 'Score: 0', {
+            fontSize: '24px',
+            color: '#ffffff'
+        }).setDepth(5);
+
+        this.remainingAttemptsText = this.add.text(20, 45, `Remaining Attempts: 0`, {
+        fontSize: '24px',
+        color: '#ffffff'
+        }).setDepth(5);
+
+        this.generateGame(8);    
     }
 
     update() {
-        //this.background.tilePositionX += 32;
-        this.ladyBug.anims.play('idle', true);
-        
+        this.ladyBug.anims.play('idle', true);      
     }
 
-    onSelectedTile(tile)
-    {
-        tile.startMoveAnimation(this.resultColor, this.targetColor);
-        this.time.delayedCall(1021, () => {
-            this.selectionCount++;
-            if (this.resultColor.compare(this.targetColor)) {
-                this.ladyBug.anims.play('jump', true);
-                this.time.delayedCall(2000, () => {
-                    this.scene.restart();
-                });
-            }else if (this.selectionCount >= this.maxSelectionCount)
-            {
-                                this.time.delayedCall(2000, () => {
-                this.scene.restart();
-                                });
-            }
-        });
+    onSelectedTile(tile) {
+        this.hueWheel.updateCurrentMarker(tile.hueValue);
+        const result = this.hueWheel.areMarkerCloseEnough();
+        if (result.isWithinRange) {
+            this.score += result.diff;
+            this.scoreText.setText(`Puntos: ${this.score}`);
+            this.resetGame();
+
+        } else if (this.currentTryNumber > this.maxTryNumber) {
+            this.scene.start('GameOver', { score: this.score }); // cambiar de escena con puntaje
+        } else {
+            //this.generateValidCombinations(8);
+            this.currentTryNumber++;
+            const remainingAttempts = this.maxTryNumber - this.currentTryNumber;
+            this.remainingAttemptsText.setText(`Remaining Attempts: ${remainingAttempts}`);
+        }
     }
 
     generateGame(tilesNumber) {
+
+        const marginY = 0.4;
+        const centerX = this.scale.width / 2;
+        const centerY = this.scale.height / 2;
+        const endYPostion = (centerY * marginY);
+        this.createHueWheel(centerX, endYPostion);
+        this.generateValidCombinations(tilesNumber);
+        this.maxTryNumber = Phaser.Math.Between(5, 12);
+        this.remainingAttemptsText.setText(`Remaining Attempts: ${this.maxTryNumber}`);
+    }
+
+    createHueWheel(x, y) {
+        let hue = Phaser.Math.Between(0, 360);
+        this.hueWheel = new HUEWheel(this,x,y,100, 40, hue, this.currentValidRange);
+    }
+
+    generateValidCombinations(tilesNumber) {
+        this.gametiles.length = 0;
+
         const marginX = 0.4;
         const marginY = 0.4;
 
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
 
+        const endYPostion =  (centerY* marginY); 
         const endXPostion = this.scale.width - (centerX* marginX); 
-        const endYPostion = this.scale.height  - (centerY* marginY); 
+        const startXPosition = (centerX - (centerX* marginX)) - 40;
+        let xPos = startXPosition;
+        let yPos = endYPostion + (centerY* marginY) + 40;
 
-        this.generateTargetColor(centerX, endYPostion);
-
-        let xPos = (centerX - (centerX* marginX)) - 48;
-        let yPos = centerY - (centerY* marginY);
-        this.generateValidCombinations(tilesNumber, xPos, yPos, endXPostion);
-
-        //GenerateTarget
-
-        this.resultColor = new ColorObject(this, 148, endYPostion, 0);
-        this.resultColor.shape.setDepth(1);
-    }
-
-    generateTargetColor(x, y) {
-        let hue = Phaser.Math.Between(0, 360);
-        this.targetColor = new ColorObject(this, x, y, hue);
-    }
-
-    generateValidCombinations(tilesNumber,x, y, endXPostion) {
-        let tiles = [];
-        let xPos = x;
-        let yPos = y;
-
-        this.maxSelectionCount = 2;
         for (let i = 0; i < tilesNumber; i++) {
             //Use basic colors that are easy to mix
             let hue = Phaser.Math.Between(0, 360);
-            tiles[i] = new ColorObject(this, xPos, yPos, hue);
+            this.gametiles[i] = new ColorTile(this, xPos, yPos, hue);
 
-            const nextXPos = xPos + (96*2);
+            const nextXPos = xPos + ( this.gametiles[i].width*2);
             if(nextXPos >= endXPostion)
             {
-                xPos = x - 48;
-                yPos += 96*2;
+                xPos = startXPosition -  this.gametiles[i].width;
+                yPos +=  this.gametiles[i].height*2;
             }else{
                 xPos = nextXPos;
             }
 
-            tiles[i].shape.on('pointerdown', () => {
-                this.onSelectedTile(tiles[i]);
+            this.gametiles[i].shape.on('pointerdown', () => {
+                this.onSelectedTile( this.gametiles[i]);
             });
-            tiles[i].shape.setDepth(2);
-            //hue = (hue + colorStep);
+            this.gametiles[i].shape.setDepth(2);
         }
+        
+    }
+
+    resetGame() {
+
+        // Reiniciar intentos
+        this.currentTryNumber = 0;
+        this.hueWheel.destroy();
+        this.generateGame(8);
     }
 }
