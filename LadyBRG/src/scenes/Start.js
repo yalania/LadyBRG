@@ -15,14 +15,14 @@ export class Start extends Phaser.Scene {
     create() {
         this.background = this.add.image(1152, 648, 'background');
         //this.background.setScale(0.5); 
-        this.ladyBug = new LadyBug(this, 100, 450, 'LadyBug');
-        this.ladyBug.setDepth(3);
+        this.ladyBug = new LadyBug(this, 100, 450, 'LadyBug', 270);
+        this.ladyBug.setScale(3);
 
         this.add.text(0, 0, 'Click to add new Scene');
 
         this.input.once('pointerdown', function () {
 
-            tthis.scene.start('Main');
+            this.scene.start('Main');
 
         }, this);
     }

@@ -22,19 +22,34 @@ export default class ColorHelper {
         return Phaser.Display.Color.GetColor(rgb.r, rgb.g, rgb.b);
     }
 
-        /**
-     * Convierte un hue a un valor hexadecimal usando valores de saturacion y luminosidad de la configuracion.
-     * @param {Phase.scene} scene - escene del juego
-     * @param {number} hue - Hue en grados (0-360)
-     * @returns {number} Color en formato hexadecimal
-     */
+    /**
+ * Convierte un hue a un valor hexadecimal usando valores de saturacion y luminosidad de la configuracion.
+ * @param {Phase.scene} scene - escene del juego
+ * @param {number} hue - Hue en grados (0-360)
+ * @returns {number} Color en formato hexadecimal
+ */
     static defaultHueToHex(scene, hue) {
-        const rgb = this.hueToRGB(hue, scene.game.config.saturation, scene.game.config.lightness);
+        const rgb = this.hueToRGB(hue, scene.config.saturation, scene.config.lightness);
         return Phaser.Display.Color.GetColor(rgb.r, rgb.g, rgb.b);
     }
 
     static addColors(hueValue1, hueValue2) {
-        return ((hueValue1 + hueValue2) / 2) % 360;
+        let delta = ((hueValue2 - hueValue1 + 360) % 360);
+        return (hueValue1 + delta / 2) % 360;
+    }
+    
+    static subtractColors(hueValue1, hueValue2) {
+        let delta = ((hueValue1 - hueValue2 + 360) % 360);
+        return (hueValue1 - delta / 2 + 360) % 360;
+    }
+
+    static getColorToTarget(currentHue, targetHue) {
+        const clockwiseDelta = (targetHue - currentHue + 360) % 360;
+        const useAdd = clockwiseDelta <= 180;
+  
+        const hue = (2 * targetHue - currentHue + 360) % 360;
+        const direction = useAdd ? 1 : -1;
+        return { hue, direction };
     }
 
     static compareHUEValues(hueValue1, hueValue2, validRange) {

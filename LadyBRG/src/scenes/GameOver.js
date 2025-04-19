@@ -1,6 +1,11 @@
+import {LadyBug} from '../gameObjects/LadyBug.js';
 export class GameOver extends Phaser.Scene {
     constructor() {
         super('GameOver');
+    }
+
+    preload() {
+        this.load.spritesheet('LadyBug', 'assets/character/ladybug.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     init(data) {
@@ -16,7 +21,7 @@ export class GameOver extends Phaser.Scene {
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        this.add.text(centerX, centerY, `Puntaje: ${this.score}`, {
+        this.add.text(centerX, centerY, `Score: ${this.score}`, {
             fontSize: '32px',
             color: '#ffff00'
         }).setOrigin(0.5);
@@ -31,5 +36,9 @@ export class GameOver extends Phaser.Scene {
         restartText.on('pointerdown', () => {
             this.scene.start('Main');
         });
+
+        this.ladybug = new LadyBug(this, centerX,centerY - 180, 'LadyBug', -90);
+        this.ladybug.setScale(5);
+        this.ladybug.anims.play('fail', true);
     }
 }

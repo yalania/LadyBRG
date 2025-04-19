@@ -1,9 +1,11 @@
 export class LadyBug extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, texture, frame) {
-        super(scene, x, y, texture, frame);
-        // ...
+    constructor(scene, x, y, texture, angle) {
+        super(scene, x, y, texture);
+                this.setDepth(2);
+                this.setScale(2);
+        this.setAngle(angle + 90);
         scene.add.existing(this);
-        this.setScale(3);
+
 
         scene.anims.create({
             key: 'move',
@@ -37,7 +39,7 @@ export class LadyBug extends Phaser.Physics.Arcade.Sprite {
             key: 'fail',
             frames: this.anims.generateFrameNumbers('LadyBug', { start: 27, end: 30 }),
             frameRate: 5,
-            repeat: -1
+            repeat:0
         });
     }
 }

@@ -1,4 +1,5 @@
 import ColorHelper from '../helpers/ColorHelper.js';
+import {LadyBug} from '../gameObjects/LadyBug.js';
 
 export default class HUEWheel {
     constructor(scene, x, y, radius, width, hue, validRange) {
@@ -8,19 +9,22 @@ export default class HUEWheel {
         this.width = width;
         this.radius = radius;
         this.targetHue = hue;
-        this.currentHue = 0;
         this.offset = 270;
         this.validRange = validRange;
-
 
         this.hueCircle = this.scene.add.graphics();
         this.drawHueCircle();
 
         // Marcadores
         this.targetMarker = this.createTargetZoneMarker();
-        this.currentMarker = this.createLinealMarker(0x000000);
 
-        this.updateCurrentMarker(0);
+
+        //Starting color and current marker
+        const offset = 20 + validRange;
+        const randomAngleOffset = Phaser.Math.Between(offset, 360 - offset);
+        this.currentHue = (hue + randomAngleOffset) % 360;
+        this.currentMarker = this.createCurrentMarker();
+        this.currentMarker.anims.play('idle', true);
     }
 
     createTargetZoneMarker() {
@@ -29,24 +33,15 @@ export default class HUEWheel {
         marker.lineStyle(this.width, ColorHelper.defaultHueToHex(this.scene, this.targetHue));
 
         const midAngle = (this.offset + this.targetHue) % 360;
-        marker.arc(this.x, this.y, this.radius + this.width +2, Phaser.Math.DegToRad(midAngle - this.validRange), Phaser.Math.DegToRad(midAngle + this.validRange), false);
+        marker.arc(this.x, this.y, this.radius + this.width + 2, Phaser.Math.DegToRad(midAngle - this.validRange), Phaser.Math.DegToRad(midAngle + this.validRange), false);
         marker.strokePath();
         marker.closePath();
         return marker;
     }
 
-    createLinealMarker(color) {
-        const marker = this.scene.add.line(0, 0, 0, 0, 0, -this.width/2, color)
-            .setOrigin(0.5, 1)
-            .setLineWidth(3)
-            .setDepth(2);
-        return marker;
-    }
-
-    createCircularMarker(color) {
-        const marker = this.scene.add.circle(0, 0, this.width/2, color);
-        marker.setDepth(1);
-        return marker;
+    createCurrentMarker() {
+        const result = this.positionMarker(this.currentHue);
+        return new LadyBug(this.scene, result.xPos, result.yPos, 'LadyBug', result.angle);
     }
 
     drawHueCircle() {
@@ -62,22 +57,58 @@ export default class HUEWheel {
         }
     }
 
-    updateCurrentMarker(hue) {
-        this.currentHue = ColorHelper.addColors(this.currentHue, hue);
-        this.positionMarker(this.currentMarker, this.currentHue);
-        this.currentMarker.setStrokeStyle(this.width/2, ColorHelper.hueToHex(this.currentHue));
+    positionMarker(hue) {
+        const angle = Phaser.Math.DegToRad(hue + this.offset);
+        const markerDistance = this.radius + this.width / 2 + 10;
+        const x = this.x + markerDistance * Math.cos(angle);
+        const y = this.y + markerDistance * Math.sin(angle);
+        const angleDeg = Phaser.Math.RadToDeg(angle);
+        return {
+            xPos: x,
+            yPos: y,
+            angle: angleDeg
+        };
     }
 
-    positionMarker(marker, hue) {
-        const angle = Phaser.Math.DegToRad(hue + this.offset); // -90 para que 0° apunte hacia arriba
-        const x = this.x + this.radius * Math.cos(angle);
-        const y = this.y + this.radius * Math.sin(angle);
-        marker.setPosition(x, y);
-        marker.setRotation(angle + Phaser.Math.DegToRad(this.offset)); // Ajustamos para que la barra apunte hacia afuera
+    updateCurrentMarker(hue, direction ,finishCallback) {
+        const oldHue = this.currentHue;
+        this.currentHue = direction == 1 ? ColorHelper.addColors(this.currentHue, hue) : ColorHelper.subtractColors(this.currentHue, hue);
+        const markerDistance = this.radius + this.width / 2 + 10;
+
+        const ellipse = new Phaser.Curves.Ellipse(this.x, this.y, markerDistance, markerDistance);
+        const fromT = ((this.offset + oldHue) % 360) / 360;
+        let toT = ((this.offset + this.currentHue) % 360) / 360;
+
+        if (direction === 1 && toT < fromT) {
+            toT += 1;
+        } else if (direction === -1 && toT > fromT) {
+            toT -= 1;
+        }
+
+        this.scene.tweens.addCounter({
+            from: fromT,
+            to: toT,
+            duration: 500,
+            ease: 'Sine.easeInOut',
+            onUpdate: (tween) => {
+                const t = tween.getValue();
+                const point = ellipse.getPoint(t);
+                this.currentMarker.setPosition(point.x, point.y);
+
+                const tangent = ellipse.getTangent(t);
+                let angle = Phaser.Math.RadToDeg(Math.atan2(tangent.y, tangent.x));
+
+                this.currentMarker.setAngle(angle);
+                this.currentMarker.anims.play('jump', true);
+            },
+            onComplete: () => {
+                finishCallback();
+                this.currentMarker.anims.play('idle', true);
+            }
+        });
     }
 
-    areMarkerCloseEnough()
-    {
+    areMarkerCloseEnough() {
         const result = ColorHelper.compareHUEValues(this.targetHue, this.currentHue, this.validRange);
         const scoreResult = 360 - result.diff;
         return {
@@ -86,8 +117,12 @@ export default class HUEWheel {
         };
     }
 
-    destroy()
+    getPerfectColorToTarget()
     {
+        return ColorHelper.getColorToTarget(this.currentHue, this.targetHue);
+    }
+
+    destroy() {
         this.hueCircle.destroy();
         this.targetMarker.destroy();
         this.currentMarker.destroy();
