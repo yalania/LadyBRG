@@ -18,7 +18,6 @@ export default class HUEWheel {
         // Marcadores
         this.targetMarker = this.createTargetZoneMarker();
 
-
         //Starting color and current marker
         const offset = 20 + validRange;
         const randomAngleOffset = Phaser.Math.Between(offset, 360 - offset);
@@ -49,8 +48,10 @@ export default class HUEWheel {
         for (let i = 0; i < steps; i++) {
             this.hueCircle.beginPath();
             this.hueCircle.lineStyle(this.width, ColorHelper.defaultHueToHex(this.scene, i));
+            
             const currentStartAngle = (this.offset + i) % 360;
             const currentEndAngle = (currentStartAngle + 1) % 360;
+
             this.hueCircle.arc(this.x, this.y, this.radius, Phaser.Math.DegToRad(currentStartAngle), Phaser.Math.DegToRad(currentEndAngle), false);
             this.hueCircle.strokePath();
             this.hueCircle.closePath();

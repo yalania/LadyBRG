@@ -37,6 +37,10 @@ export class GameOver extends Phaser.Scene {
             this.scene.start('Main');
         });
 
+        this.input.keyboard.once('keydown-SPACE', () => {
+            this.scene.start('Main');
+        });
+
         this.ladybug = new LadyBug(this, centerX,centerY - 180, 'LadyBug', -90);
         this.ladybug.setScale(5);
         this.ladybug.anims.play('fail', true);

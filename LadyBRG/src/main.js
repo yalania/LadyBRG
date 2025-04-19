@@ -13,7 +13,7 @@ const config = {
     backgroundColor: '#000000',
     pixelArt: false,
     scene: [
-          Main, GameOver
+          Start, Main, GameOver
          //TestScene
     ],
     scale: {

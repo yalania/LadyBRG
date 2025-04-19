@@ -59,7 +59,7 @@ export class Main extends Phaser.Scene {
                 this.currentValidRange = Phaser.Math.Clamp(newValidRange, 1, newValidRange);
                 this.needReset = true;
 
-            } else if (this.currentTryNumber >= this.maxTryNumber) {
+            } else if (this.currentTryNumber > this.maxTryNumber) {
                 this.scene.start('GameOver', { score: this.score }); // cambiar de escena con puntaje
             } else {
                 this.generateValidCombinations();
