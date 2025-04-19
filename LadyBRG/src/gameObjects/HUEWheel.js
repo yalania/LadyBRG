@@ -23,8 +23,8 @@ export default class HUEWheel {
         const offset = 20 + validRange;
         const randomAngleOffset = Phaser.Math.Between(offset, 360 - offset);
         this.currentHue = (hue + randomAngleOffset) % 360;
-        this.currentMarker = this.createCurrentMarker();
-        this.currentMarker.anims.play('idle', true);
+        this.ladyBugMarker = this.createLadyBugMarker();
+        this.ladyBugMarker.anims.play('idle', true);
     }
 
     createTargetZoneMarker() {
@@ -39,7 +39,7 @@ export default class HUEWheel {
         return marker;
     }
 
-    createCurrentMarker() {
+    createLadyBugMarker() {
         const result = this.positionMarker(this.currentHue);
         return new LadyBug(this.scene, result.xPos, result.yPos, 'LadyBug', result.angle);
     }
@@ -70,7 +70,7 @@ export default class HUEWheel {
         };
     }
 
-    updateCurrentMarker(hue, direction ,finishCallback) {
+    updateladyBugMarker(hue, direction ,finishCallback) {
         const oldHue = this.currentHue;
         this.currentHue = direction == 1 ? ColorHelper.addColors(this.currentHue, hue) : ColorHelper.subtractColors(this.currentHue, hue);
         const markerDistance = this.radius + this.width / 2 + 10;
@@ -93,17 +93,17 @@ export default class HUEWheel {
             onUpdate: (tween) => {
                 const t = tween.getValue();
                 const point = ellipse.getPoint(t);
-                this.currentMarker.setPosition(point.x, point.y);
+                this.ladyBugMarker.setPosition(point.x, point.y);
 
                 const tangent = ellipse.getTangent(t);
                 let angle = Phaser.Math.RadToDeg(Math.atan2(tangent.y, tangent.x));
 
-                this.currentMarker.setAngle(angle);
-                this.currentMarker.anims.play('jump', true);
+                this.ladyBugMarker.setAngle(angle);
+                this.ladyBugMarker.anims.play('jump', true);
             },
             onComplete: () => {
                 finishCallback();
-                this.currentMarker.anims.play('idle', true);
+                this.ladyBugMarker.anims.play('idle', true);
             }
         });
     }
@@ -125,6 +125,6 @@ export default class HUEWheel {
     destroy() {
         this.hueCircle.destroy();
         this.targetMarker.destroy();
-        this.currentMarker.destroy();
+        this.ladyBugMarker.destroy();
     }
 }

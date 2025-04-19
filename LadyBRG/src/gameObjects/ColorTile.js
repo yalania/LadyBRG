@@ -1,74 +1,28 @@
 import ColorHelper from '../helpers/ColorHelper.js';
+
 export default class ColorTile {
     constructor(scene, x, y, hue, direction) {
         this.x = x;
         this.y = y;
         this.hueValue = hue;
-        this.width = scene.config.tilesSize;
-        this.height = scene.config.tilesSize;
+        this.size = scene.config.tilesSize;
         this.direction = direction;
-        this.arrowSize = 20;
-
-        const data = direction == 1 ? this.getRightArrowData() : this.getLeftArrowData();
-        this.shape = scene.add.polygon(x, y, data, ColorHelper.defaultHueToHex(scene, hue));
-
-        this.shape.setOrigin(0.5);
-        this.shape.setInteractive();
+        this.shape = this.drawRotationArrow(scene, x, y, ColorHelper.defaultHueToHex(scene, this.hueValue));
+        this.shape.setInteractive({ useHandCursor: true });
     }
 
-    getRightArrowData() {
-        const shaftHeight = this.height;
-        const shaftLength = this.width;
-        const arrowSize = this.arrowSize;
-        const rightArrowData = [
-            // Línea vertical izquierda
-            0, 0,
-            0, shaftHeight,
+    drawRotationArrow(scene, x, y, color = 0xffffff) {
+        const rotationSymbol = this.direction === 1 ? '↻' : '↺';
+        const hexColor = Phaser.Display.Color.ValueToColor(color).color;
+        const icon = scene.add.text(x , y, rotationSymbol, {
+            font: `${this.size}px Arial`,
+            fill: `#${hexColor.toString(16).padStart(6, '0')}`
+        });
 
-            // Línea horizontal hasta la derecha
-            shaftLength, shaftHeight,
-
-            // Punta de flecha
-            shaftLength, shaftHeight + arrowSize,
-            shaftLength + arrowSize, shaftHeight / 2,
-            shaftLength, -arrowSize,
-
-            // Línea de vuelta hacia inicio
-            shaftLength, 0,
-            0, 0
-        ];
-
-        return rightArrowData;
+        return icon;
     }
 
-
-    getLeftArrowData() {
-        const shaftHeight = this.height;
-        const shaftLength = this.width;
-        const arrowSize = this.arrowSize;
-        const leftArrowData = [
-            // Línea vertical derecha
-            shaftLength, 0,
-            shaftLength, shaftHeight,
-
-            // Línea horizontal hasta la derecha
-            0, shaftHeight,
-
-            // Punta de flecha
-            0, shaftHeight + arrowSize,
-            -arrowSize, shaftHeight / 2,
-            0, -arrowSize,
-
-            // Línea de vuelta hacia inicio
-            0, 0,
-            shaftLength, 0
-        ];
-
-        return leftArrowData;
-    }
-    
-    destroy()
-    {
+    destroy() {
         this.shape.destroy();
     }
 }

@@ -1,8 +1,8 @@
 {
   "saturation": 1,
   "lightness": 1,
-  "tilesSize": 40,
-  "tilesNumber": 3,
+  "tilesSize": 80,
+  "tilesNumber": 10,
   "minNumberOfTries": 2,
   "maxNumberOfTries": 6,
   "marginX": 0.4,

@@ -29,13 +29,13 @@ export class Main extends Phaser.Scene {
 
         //Score
         this.scoreText = this.add.text(20, 20, 'Score: 0', {
-            fontSize: '24px',
-            color: '#ffffff'
+            fontSize: '32px',
+            color: '#ffff00'
         }).setDepth(5);
 
-        this.remainingAttemptsText = this.add.text(20, 45, `Remaining Attempts: 0`, {
-            fontSize: '24px',
-            color: '#ffffff'
+        this.remainingAttemptsText = this.add.text(20, 60, `Remaining Attempts: 0`, {
+            fontSize: '32px',
+            color: '#000000'
         }).setDepth(5);
 
         this.generateGame();
@@ -50,7 +50,7 @@ export class Main extends Phaser.Scene {
     }
 
     onSelectedTile(tile) {
-        this.hueWheel.updateCurrentMarker(tile.hueValue, tile.direction, () => {
+        this.hueWheel.updateladyBugMarker(tile.hueValue, tile.direction, () => {
             const result = this.hueWheel.areMarkerCloseEnough();
             if (result.isWithinRange) {
                 this.score += result.diff;
@@ -85,14 +85,15 @@ export class Main extends Phaser.Scene {
 
     generateValidCombinations() {
         this.destroyTiles();
-
         const tilesNumber = this.config.tilesNumber;
         const tileSize = this.config.tilesSize;
-        const totalTileWidth = tilesNumber* tileSize * 2;
-        const startXPosition = (this.scale.width - totalTileWidth) / 2;
+
+        const maxTilesNumberPerRow = this.scale.width/ (tileSize + tileSize*2);
+        const totalTileWidth = Math.min(maxTilesNumberPerRow,tilesNumber)* tileSize;
+        const startXPosition =  this.centerX - totalTileWidth;
        
         let xPos = startXPosition;
-        let yPos = this.centerY;
+        let yPos = this.centerY + (this.centerY * this.config.marginY)/2;
 
         let bestColorPosition = Phaser.Math.Between(0, tilesNumber - 1);
         for (let i = 0; i <tilesNumber; i++) {
@@ -110,10 +111,12 @@ export class Main extends Phaser.Scene {
 
             this.gametiles[i] = new ColorTile(this, xPos, yPos, hue, direction);
 
-            const nextXPos = xPos + tileSize * 2 + this.gametiles[i].arrowSize * this.gametiles[i].direction;
-            if (nextXPos >= this.scale.width) {
-                xPos = startXPosition;
-                yPos += this.gametiles[i].height * 2;
+            const nextXPos = xPos + tileSize * 2;
+            if (nextXPos >= this.scale.width - tileSize*2) {
+                const leftTileNumber = tilesNumber - i -1;
+                const totalTileWidth = Math.min(maxTilesNumberPerRow,leftTileNumber)* tileSize;
+                xPos = this.centerX - totalTileWidth;
+                yPos += this.gametiles[i].size * 2;
             } else {
                 xPos = nextXPos;
             }
