@@ -14,14 +14,20 @@ export class Main extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('background', 'assets/background/Summer5.png');
+        this.load.image('MainBackground', 'assets/background/MainBackground.png');
         this.load.spritesheet('LadyBug', 'assets/character/ladybug.png', { frameWidth: 32, frameHeight: 32 });
         this.load.json('gameConfig', 'assets/data/MainScene.json');
+        this.load.font('CuteFont', 'assets/fonts/CuteDino.ttf');
     }
 
     create() {
         this.config = this.cache.json.get('gameConfig');
-        this.background = this.add.image(1152, 648, 'background');
+        this.background = this.add.image(0, 0, 'MainBackground')
+            .setOrigin(0)
+            .setScale(0.65);
+        const overlay = this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 0.2);
+        overlay.setOrigin(0);
+
         this.currentValidRange = this.config.validErrorRange;
 
         this.centerX = this.scale.width / 2;
@@ -30,16 +36,17 @@ export class Main extends Phaser.Scene {
         //Score
         this.scoreText = this.add.text(20, 20, 'Score: 0', {
             fontSize: '32px',
-            color: '#ffff00'
+            color: '#ffff00',
+            fontFamily: 'CuteFont',
         }).setDepth(5);
 
         this.remainingAttemptsText = this.add.text(20, 60, `Remaining Attempts: 0`, {
             fontSize: '32px',
-            color: '#000000'
+            color: '#ffffff',
+            fontFamily: 'CuteFont',
         }).setDepth(5);
 
         this.generateGame();
-        this.referenceShape =  this.add.circle(this.scale.width - this.config.tilesSize, this.config.tilesSize, this.config.tilesSize/2, ColorHelper.defaultHueToHex(this, this.hueWheel.currentHue));
     }
 
     update() {
@@ -52,19 +59,19 @@ export class Main extends Phaser.Scene {
     onSelectedTile(tile) {
         this.hueWheel.updateladyBugMarker(tile.hueValue, tile.direction, () => {
             const result = this.hueWheel.areMarkerCloseEnough();
+            const remainingAttempts = this.maxTryNumber - this.currentTryNumber;
             if (result.isWithinRange) {
                 this.score += result.diff;
-                this.scoreText.setText(`Puntos: ${this.score}`);
+                this.scoreText.setText(`Score: ${this.score}`);
                 const newValidRange = this.currentValidRange - 5
                 this.currentValidRange = Phaser.Math.Clamp(newValidRange, 1, newValidRange);
                 this.needReset = true;
 
-            } else if (this.currentTryNumber > this.maxTryNumber) {
+            } else if (remainingAttempts <= 0) {
                 this.scene.start('GameOver', { score: this.score }); // cambiar de escena con puntaje
             } else {
                 this.generateValidCombinations();
                 this.currentTryNumber++;
-                const remainingAttempts = this.maxTryNumber - this.currentTryNumber;
                 this.remainingAttemptsText.setText(`Remaining Attempts: ${remainingAttempts}`);
             }
         });

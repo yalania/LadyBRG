@@ -6,7 +6,7 @@ export class Start extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('background', 'assets/background/Summer6.png');
+        this.load.image('StartBackground', 'assets/background/StartBackground.png');
         this.load.spritesheet('LadyBug', 'assets/character/ladybug.png', {
             frameWidth: 32,
             frameHeight: 32
@@ -14,7 +14,9 @@ export class Start extends Phaser.Scene {
     }
 
     create() {
-        this.background = this.add.image(1152, 648, 'background');
+        this.background = this.add.image(0, 0, 'StartBackground')
+            .setOrigin(0)
+            .setScale(0.65);
 
         this.ladyBug = new LadyBug(this, -100, 550, 'LadyBug', 270);
         this.ladyBug.setScale(4);
@@ -27,16 +29,16 @@ export class Start extends Phaser.Scene {
         const centerY = this.scale.height / 2;
 
         this.add.text(centerX, centerY - 100, 'Lady BRG', {
-            fontSize: '64px',
-            fontFamily: 'Arial',
-            color: '#ffffff',
+            fontSize: '200px',
+            fontFamily: 'Heyam',
+            color: '#cc111f',
             align: 'center'
         }).setOrigin(0.5);
 
-        this.add.text(centerX, centerY, 'Click or Press SPACEBAR to start', {
-            fontSize: '32px',
-            fontFamily: 'Arial',
-            color: '#ffffff',
+        this.add.text(centerX, centerY + 100, 'Click or Press SPACEBAR to start', {
+            fontSize: '40px',
+            fontFamily: 'Heyam',
+            color: '#000000',
             align: 'center'
         }).setOrigin(0.5);
 

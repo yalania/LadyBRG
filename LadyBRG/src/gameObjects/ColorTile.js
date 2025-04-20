@@ -14,12 +14,11 @@ export default class ColorTile {
     drawRotationArrow(scene, x, y, color = 0xffffff) {
         const rotationSymbol = this.direction === 1 ? '↻' : '↺';
         const hexColor = Phaser.Display.Color.ValueToColor(color).color;
-        const icon = scene.add.text(x , y, rotationSymbol, {
+        const text = scene.add.text(x , y, rotationSymbol, {
             font: `${this.size}px Arial`,
             fill: `#${hexColor.toString(16).padStart(6, '0')}`
         });
-
-        return icon;
+        return text;
     }
 
     destroy() {
