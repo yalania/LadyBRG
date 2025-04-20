@@ -2,7 +2,7 @@
 
 Hello!
 
-This is a quick prototype I created for the [Gamedev.js Jam 2025](https://itch.io/jam/gamedevjs-2025).
+This is a quick prototype I created for the [Gamedev.js Jam 2025](https://itch.io/jam/gamedevjs-2025) using **[Phaser](https://phaser.io/)**.
 
 The theme for the jam was **balance**. When I thought about balance, I immediately connected it with **color mixing**. I had several ideas around this concept, but most of them ended up being too complicated or hard to understand at first glance.
 
@@ -24,7 +24,7 @@ The ladybug will move around the color wheel in the chosen direction toward the 
 
 - **LadyBug Sprite:** [MissLadyBug by Leanpus](https://leanpus.itch.io/missladybug)  
 - **Background:** [Pixel Art Nature Backgrounds by CraftPix](https://craftpix.net/freebies/free-nature-backgrounds-pixel-art/)  
-- **Font:** [Heyam on Dafont](https://www.dafont.com/heyam.font)
+- **Font:** [Heyam on Dafont](https://www.dafont.com/heyam.font) & [Cute Dino on Dafont](https://www.dafont.com/cute-dino-2.font)
 
 ---
 
